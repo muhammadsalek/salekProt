@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# planning notes (local only)
+PLAN.md
+
+# playwright
+/playwright-report/
+/test-results/
