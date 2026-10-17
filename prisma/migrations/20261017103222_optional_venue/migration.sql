@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Publication" ALTER COLUMN "venue" DROP NOT NULL,
+ALTER COLUMN "venue" DROP DEFAULT;

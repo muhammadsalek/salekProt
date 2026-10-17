@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Single admin account (the researcher).
+model AdminUser {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  passwordHash   String
+  // Bumped on password/email change so existing sessions stop working.
+  sessionVersion Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// Always a single row with id = 1.
+model Profile {
+  id              Int       @id @default(1)
+  name            String
+  title           String    @default("")
+  department      String    @default("")
+  institution     String    @default("")
+  location        String    @default("")
+  focus           String    @default("")
+  shortBio        String    @default("")
+  longBio         String    @default("")
+  email           String    @default("")
+  address         String    @default("")
+  photoUrl        String?
+  cvUrl           String?
+  cvUpdatedAt     DateTime?
+  scholarUrl      String?
+  orcidUrl        String?
+  researchGateUrl String?
+  githubUrl       String?
+  linkedinUrl     String?
+  xUrl            String?
+  youtubeUrl      String?
+  updatedAt       DateTime  @updatedAt
+}
+
+enum PublicationType {
+  JOURNAL
+  CONFERENCE
+  PREPRINT
+  THESIS
+  OTHER
+}
+
+enum PublicationStatus {
+  PUBLISHED
+  ACCEPTED
+  UNDER_REVIEW
+  PREPRINT
+  IN_PREPARATION
+}
+
+model Publication {
+  id        String            @id @default(cuid())
+  title     String
+  authors   String
+  venue     String?
+  year      Int
+  type      PublicationType   @default(JOURNAL)
+  status    PublicationStatus @default(PUBLISHED)
+  doi       String?
+  url       String?
+  pdfUrl    String?
+  codeUrl   String?
+  abstract  String?
+  bibtex    String?
+  featured  Boolean           @default(false)
+  tags      String[]
+  countries String[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([year])
+}
+
+// A YouTube tutorial added by hand in the admin.
+model Tutorial {
+  id           String   @id @default(cuid())
+  title        String
+  videoUrl     String
+  // Optional custom thumbnail; YouTube's own thumbnail is used when empty.
+  thumbnailUrl String?
+  description  String?
+  date         DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ResearchArea {
+  id        String   @id @default(cuid())
+  title     String
+  summary   String
+  imageUrl  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Award {
+  id          String   @id @default(cuid())
+  title       String
+  issuer      String?
+  year        Int
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Education {
+  id          String   @id @default(cuid())
+  degree      String
+  institution String
+  startYear   Int
+  endYear     Int?
+  details     String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String
+  category  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
