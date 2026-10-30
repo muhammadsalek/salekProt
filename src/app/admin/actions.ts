@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { z } from "zod";
 import { createRecord, deleteRecord, getRecord, updateRecord } from "@/lib/admin/data";
-import { readForm, schemaFor, type Field, type FormState } from "@/lib/admin/fields";
+import { readForm, schemaFor, uploadedUrls, type Field, type FormState } from "@/lib/admin/fields";
 import { getResource, profileFields } from "@/lib/admin/resources";
 import { createSession, deleteSession, requireAdmin } from "@/lib/auth";
 import {
@@ -64,24 +64,30 @@ export async function getUploadTicket(kind: UploadKind): Promise<UploadTicket | 
 
 type Values = Record<string, unknown> | null;
 
+const isUpload = (f: Field) => f.type === "upload" || f.type === "uploads";
+
 /** Rejects upload URLs that did not come from our Cloudinary account (unchanged values are fine). */
 function checkUploads(fields: readonly Field[], data: Values, before: Values) {
   const errors: Record<string, string[]> = {};
-  for (const f of fields) {
-    const value = data?.[f.name];
-    if (f.type !== "upload" || typeof value !== "string" || value === before?.[f.name]) continue;
-    if (!isOwnAsset(value, f.upload ?? "image")) errors[f.name] = ["Please upload the file again."];
+  for (const f of fields.filter(isUpload)) {
+    const previous = uploadedUrls(before?.[f.name]);
+    const added = uploadedUrls(data?.[f.name]).filter((v) => !previous.includes(v));
+    if (added.some((v) => !isOwnAsset(v, f.upload ?? "image"))) {
+      errors[f.name] = [
+        f.type === "uploads" ? "Please upload the files again." : "Please upload the file again.",
+      ];
+    }
   }
   return Object.keys(errors).length ? errors : null;
 }
 
 /** After the response, deletes Cloudinary files that were replaced or removed. */
 function deleteReplacedUploads(fields: readonly Field[], before: Values, current: Values) {
-  const stale = fields
-    .filter((f) => f.type === "upload")
-    .map((f) => before?.[f.name])
-    .filter((v, i, all): v is string => typeof v === "string" && v !== "" && all.indexOf(v) === i)
-    .filter((v) => !fields.some((f) => current?.[f.name] === v));
+  const uploadFields = fields.filter(isUpload);
+  const kept = new Set(uploadFields.flatMap((f) => uploadedUrls(current?.[f.name])));
+  const stale = [...new Set(uploadFields.flatMap((f) => uploadedUrls(before?.[f.name])))].filter(
+    (v) => !kept.has(v),
+  );
   if (stale.length) after(() => Promise.all(stale.map(deleteAsset)));
 }
 
@@ -153,10 +159,13 @@ export async function saveProfile(_prev: FormState, formData: FormData): Promise
     };
   }
 
-  // Profile columns are non-null strings except the links, so map empty text to "".
+  // Profile text columns are non-null strings, so map empty text to "". Links and positions stay null.
   const data = Object.fromEntries(
-    Object.entries(parsed.data).map(([k, v]) => [k, v === null && !k.endsWith("Url") ? "" : v]),
-  ) as Record<string, string | null> & { name: string };
+    Object.entries(parsed.data).map(([k, v]) => [
+      k,
+      v === null && !k.endsWith("Url") && !k.endsWith("Order") ? "" : v,
+    ]),
+  ) as Record<string, string | number | null> & { name: string };
 
   const before = await db.profile.findUnique({ where: { id: 1 } });
   const uploadErrors = checkUploads(profileFields, data, before);

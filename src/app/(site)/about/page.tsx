@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageTitle, Section } from "@/components/site/section";
+import { groupSkills } from "@/lib/format";
 import { getAboutData, getProfile } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "About" };
@@ -10,11 +11,7 @@ export default async function AboutPage() {
     getAboutData(),
   ]);
 
-  const skillGroups = new Map<string, string[]>();
-  for (const s of skills) {
-    const key = s.category || "Other";
-    skillGroups.set(key, [...(skillGroups.get(key) ?? []), s.name]);
-  }
+  const skillGroups = groupSkills(skills);
 
   return (
     <>
@@ -32,7 +29,7 @@ export default async function AboutPage() {
         <p className="mt-8">
           <a
             href="/cv"
-            className="bg-accent text-accent-foreground inline-block rounded-md px-5 py-2.5 font-medium hover:opacity-90"
+            className="bg-accent text-accent-foreground hover:bg-accent-strong inline-block rounded-md px-5 py-2.5 font-medium transition-colors"
           >
             Download CV (PDF)
           </a>
@@ -58,10 +55,10 @@ export default async function AboutPage() {
         </Section>
       )}
 
-      {skillGroups.size > 0 && (
+      {skillGroups.length > 0 && (
         <Section title="Skills">
           <dl className="grid max-w-3xl gap-6 sm:grid-cols-2">
-            {[...skillGroups].map(([category, names]) => (
+            {skillGroups.map(([category, names]) => (
               <div key={category}>
                 <dt className="font-serif text-lg font-semibold">{category}</dt>
                 <dd className="text-muted mt-1 leading-relaxed">{names.join(", ")}</dd>

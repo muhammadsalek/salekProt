@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-export function CopyBibtex({ bibtex }: { bibtex: string }) {
+export function CopyBibtex({
+  bibtex,
+  className = "text-accent hover:underline",
+}: {
+  bibtex: string;
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -12,7 +18,7 @@ export function CopyBibtex({ bibtex }: { bibtex: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
-      className="text-accent hover:underline"
+      className={className}
     >
       {copied ? "Copied" : "Copy BibTeX"}
     </button>

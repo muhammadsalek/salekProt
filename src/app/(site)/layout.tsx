@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MobileMenu } from "@/components/site/mobile-menu";
 import { SiteNav } from "@/components/site/site-nav";
 import { VideoPlayerProvider } from "@/components/site/video-player";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { profileLinks } from "@/lib/format";
 import { getProfile } from "@/lib/queries";
 
@@ -26,10 +27,13 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
           <Link href="/" className="font-serif text-xl font-semibold tracking-tight">
             {name}
           </Link>
-          <nav aria-label="Main">
-            <SiteNav className="hidden gap-6 text-[0.95rem] md:flex" />
-            <MobileMenu />
-          </nav>
+          <div className="flex items-center gap-4 md:gap-6">
+            <nav aria-label="Main">
+              <SiteNav className="hidden gap-6 text-[0.95rem] lg:flex" />
+              <MobileMenu />
+            </nav>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

@@ -1,32 +1,38 @@
 @import "tailwindcss";
 
-/* Palette from PLAN.md §4 — warm off-white, deep teal-blue accent. */
+/*
+ * Palette from PLAN.md §4 — warm off-white, deep teal-blue accent. Each token is light-dark(light, dark).
+ * The theme follows the device unless the visitor picks one: <html data-theme="light|dark">.
+ */
 :root {
-  --background: #faf8f5;
-  --surface: #ffffff;
-  --foreground: #1f2933;
-  --muted: #5b6573;
-  --border: #e4e0d9;
-  --accent: #1e5a7a;
-  --accent-foreground: #ffffff;
-  --highlight: #b5651d;
-  --danger: #b42318;
-  --success: #1f7a4d;
+  color-scheme: light dark;
+  /* All text pairs checked to WCAG AA (≥ 4.5:1) in both themes. */
+  --background: light-dark(#f9f8f5, #11151b);
+  --surface: light-dark(#ffffff, #19202a);
+  --foreground: light-dark(#18212b, #e8ebef);
+  --muted: light-dark(#55606e, #a0aab7);
+  --border: light-dark(#e3dfd8, #2a323d);
+  /* Accent: links, current state, primary actions. Used sparingly so it keeps its meaning. */
+  --accent: light-dark(#1d5a7a, #86bfdc);
+  --accent-strong: light-dark(#154560, #a9d3e8);
+  --accent-soft: light-dark(#e9f1f5, #15212b);
+  --accent-foreground: light-dark(#ffffff, #0d1820);
+  /* Amber: publication status only. */
+  --highlight: light-dark(#94500f, #e8ac6a);
+  --danger: light-dark(#b42318, #f97066);
+  --success: light-dark(#1f7a4d, #47cd89);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #14181f;
-    --surface: #1c222b;
-    --foreground: #e6e8eb;
-    --muted: #9aa4b2;
-    --border: #2c3440;
-    --accent: #7fb8d6;
-    --accent-foreground: #0e1a22;
-    --highlight: #e0a15e;
-    --danger: #f97066;
-    --success: #47cd89;
-  }
+::selection {
+  background: color-mix(in oklab, var(--accent) 25%, transparent);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -36,6 +42,8 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
   --color-accent-foreground: var(--accent-foreground);
   --color-highlight: var(--highlight);
   --color-danger: var(--danger);
@@ -47,6 +55,11 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* Keep the page behind an open photo viewer from scrolling. */
+html:has(dialog[open]:modal) {
+  overflow: hidden;
 }
 
 :focus-visible {

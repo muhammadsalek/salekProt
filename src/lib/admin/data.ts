@@ -15,10 +15,19 @@ type Delegate = {
 };
 
 const models = {
-  publications: { delegate: db.publication, orderBy: [{ year: "desc" }, { createdAt: "desc" }] },
+  publications: {
+    delegate: db.publication,
+    orderBy: [{ year: "desc" }, { status: "asc" }, { createdAt: "asc" }],
+  },
+  experience: {
+    delegate: db.experience,
+    orderBy: [{ startYear: "desc" }, { startMonth: { sort: "desc", nulls: "last" } }],
+  },
+  projects: { delegate: db.project, orderBy: [{ order: "asc" }, { createdAt: "desc" }] },
   tutorials: { delegate: db.tutorial, orderBy: [{ date: "desc" }, { createdAt: "desc" }] },
+  gallery: { delegate: db.galleryEvent, orderBy: [{ date: "desc" }, { createdAt: "desc" }] },
   research: { delegate: db.researchArea, orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
-  awards: { delegate: db.award, orderBy: [{ year: "desc" }] },
+  awards: { delegate: db.award, orderBy: [{ year: { sort: "desc", nulls: "last" } }] },
   education: { delegate: db.education, orderBy: [{ order: "asc" }, { startYear: "desc" }] },
   skills: { delegate: db.skill, orderBy: [{ order: "asc" }, { name: "asc" }] },
 } satisfies Record<ResourceKey, { delegate: unknown; orderBy: unknown }>;

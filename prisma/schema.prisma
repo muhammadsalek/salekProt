@@ -20,28 +20,35 @@ model AdminUser {
 
 // Always a single row with id = 1.
 model Profile {
-  id              Int       @id @default(1)
-  name            String
-  title           String    @default("")
-  department      String    @default("")
-  institution     String    @default("")
-  location        String    @default("")
-  focus           String    @default("")
-  shortBio        String    @default("")
-  longBio         String    @default("")
-  email           String    @default("")
-  address         String    @default("")
-  photoUrl        String?
-  cvUrl           String?
-  cvUpdatedAt     DateTime?
-  scholarUrl      String?
-  orcidUrl        String?
-  researchGateUrl String?
-  githubUrl       String?
-  linkedinUrl     String?
-  xUrl            String?
-  youtubeUrl      String?
-  updatedAt       DateTime  @updatedAt
+  id                Int       @id @default(1)
+  name              String
+  title             String    @default("")
+  department        String    @default("")
+  institution       String    @default("")
+  location          String    @default("")
+  focus             String    @default("")
+  shortBio          String    @default("")
+  longBio           String    @default("")
+  email             String    @default("")
+  address           String    @default("")
+  photoUrl          String?
+  cvUrl             String?
+  cvUpdatedAt       DateTime?
+  scholarUrl        String?
+  orcidUrl          String?
+  researchGateUrl   String?
+  githubUrl         String?
+  linkedinUrl       String?
+  xUrl              String?
+  // Position of each profile link on the site (1 first); links without one follow.
+  scholarOrder      Int?
+  orcidOrder        Int?
+  researchGateOrder Int?
+  githubOrder       Int?
+  linkedinOrder     Int?
+  xOrder            Int?
+  youtubeUrl        String?
+  updatedAt         DateTime  @updatedAt
 }
 
 enum PublicationType {
@@ -61,24 +68,26 @@ enum PublicationStatus {
 }
 
 model Publication {
-  id        String            @id @default(cuid())
-  title     String
-  authors   String
-  venue     String?
-  year      Int
-  type      PublicationType   @default(JOURNAL)
-  status    PublicationStatus @default(PUBLISHED)
-  doi       String?
-  url       String?
-  pdfUrl    String?
-  codeUrl   String?
-  abstract  String?
-  bibtex    String?
-  featured  Boolean           @default(false)
-  tags      String[]
-  countries String[]
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id            String            @id @default(cuid())
+  title         String
+  authors       String
+  venue         String?
+  year          Int
+  type          PublicationType   @default(JOURNAL)
+  status        PublicationStatus @default(PUBLISHED)
+  doi           String?
+  url           String?
+  pdfUrl        String?
+  codeUrl       String?
+  abstract      String?
+  bibtex        String?
+  featured      Boolean           @default(false)
+  // Position among featured papers on the home page (1 = top); empty sorts last.
+  featuredOrder Int?
+  tags          String[]
+  countries     String[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
   @@index([year])
 }
@@ -92,6 +101,31 @@ model Tutorial {
   thumbnailUrl String?
   description  String?
   date         DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// A conference, presentation or other event in the Gallery. The first photo is the cover.
+model GalleryEvent {
+  id          String   @id @default(cuid())
+  title       String
+  date        DateTime
+  location    String?
+  description String?
+  photos      String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Software or data project on the Projects page.
+model Project {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  technologies String[]
+  demoUrl      String?
+  githubUrl    String?
+  order        Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -110,10 +144,38 @@ model Award {
   id          String   @id @default(cuid())
   title       String
   issuer      String?
-  year        Int
+  year        Int?
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+enum ExperienceCategory {
+  RESEARCH
+  FUNDED_PROJECT
+  TEACHING
+  PEER_REVIEW
+  LEADERSHIP
+}
+
+// A position or role on the Experience page. No end year means "Present".
+model Experience {
+  id           String             @id @default(cuid())
+  role         String
+  organization String
+  location     String?
+  category     ExperienceCategory @default(RESEARCH)
+  startYear    Int
+  startMonth   Int?
+  endYear      Int?
+  endMonth     Int?
+  // One bullet point per line.
+  description  String?
+  link         String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([category, startYear])
 }
 
 model Education {

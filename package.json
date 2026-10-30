@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "prisma dev start salek",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -11,13 +12,14 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "postinstall": "prisma generate",
-    "db:dev": "prisma dev --name salek",
+    "db:dev": "prisma dev start salek",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "admin:reset": "tsx prisma/reset-admin.ts",
-    "db:demo": "tsx prisma/demo.ts"
+    "db:content": "tsx prisma/content.ts",
+    "db:stop": "prisma dev stop salek"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

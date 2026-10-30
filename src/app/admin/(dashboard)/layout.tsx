@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { logout } from "@/app/admin/actions";
 import { NavLinks } from "@/components/admin/nav-links";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { resources } from "@/lib/admin/resources";
 import { requireAdmin } from "@/lib/auth";
 
@@ -30,7 +31,8 @@ export default async function DashboardLayout({ children }: LayoutProps<"/admin"
           <nav aria-label="Admin">
             <NavLinks links={links} />
           </nav>
-          <div className="mt-auto hidden space-y-2 md:block">
+          <div className="mt-auto hidden space-y-3 md:block">
+            <ThemeToggle className="ml-3" />
             <Link
               href="/"
               target="_blank"
@@ -48,7 +50,8 @@ export default async function DashboardLayout({ children }: LayoutProps<"/admin"
       </aside>
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 md:px-10">
         {children}
-        <div className="border-border text-muted mt-12 flex gap-4 border-t pt-4 text-sm md:hidden">
+        <div className="border-border text-muted mt-12 flex items-center gap-4 border-t pt-4 text-sm md:hidden">
+          <ThemeToggle />
           <Link href="/" target="_blank">
             View site ↗
           </Link>

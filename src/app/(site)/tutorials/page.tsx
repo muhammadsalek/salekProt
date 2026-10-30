@@ -27,7 +27,7 @@ export default async function TutorialsPage() {
             href={profile.youtubeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-accent text-accent-foreground inline-block rounded-md px-5 py-2.5 font-medium hover:opacity-90"
+            className="bg-accent text-accent-foreground hover:bg-accent-strong inline-block rounded-md px-5 py-2.5 font-medium transition-colors"
           >
             See all videos on YouTube
           </a>

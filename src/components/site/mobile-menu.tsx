@@ -6,7 +6,7 @@ import { SiteNav } from "@/components/site/site-nav";
 export function MobileMenu() {
   const ref = useRef<HTMLDetailsElement>(null);
   return (
-    <details ref={ref} className="group md:hidden">
+    <details ref={ref} className="group lg:hidden">
       <summary className="text-muted hover:text-foreground cursor-pointer list-none py-1 [&::-webkit-details-marker]:hidden">
         <span className="group-open:hidden">Menu</span>
         <span className="hidden group-open:inline">Close</span>

@@ -91,6 +91,35 @@ export function isOwnAsset(url: string, kind: UploadKind) {
   return parseAssetUrl(url)?.resourceType === KINDS[kind].resourceType;
 }
 
+/**
+ * Fetches one of our files through Cloudinary's authenticated download API.
+ * Needed for PDFs: new Cloudinary accounts refuse to deliver PDFs from public links (401).
+ */
+export async function downloadAsset(url: string): Promise<Response | null> {
+  const c = config();
+  const asset = parseAssetUrl(url);
+  if (!c || !asset) return null;
+  const params = {
+    public_id: asset.publicId,
+    timestamp: Math.floor(Date.now() / 1000),
+    type: "upload",
+  };
+  const query = new URLSearchParams({
+    ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
+    api_key: c.apiKey,
+    signature: sign(params, c.apiSecret),
+  });
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${c.cloudName}/${asset.resourceType}/download?${query}`,
+    { cache: "no-store" },
+  );
+  if (!res.ok) {
+    console.error("Cloudinary download failed", res.status, await res.text().catch(() => ""));
+    return null;
+  }
+  return res;
+}
+
 /** Deletes an uploaded file. Best effort: failures are logged, never thrown. */
 export async function deleteAsset(url: string | null | undefined) {
   const c = config();

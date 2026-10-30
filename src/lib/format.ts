@@ -8,19 +8,48 @@ export function formatDate(date: Date, style: "day" | "month" = "day") {
   });
 }
 
-/** The profile's external links that are filled in, in display order. */
+/**
+ * The profile's external links that are filled in, ordered by the positions set in the admin.
+ * Links without a position follow, in the default order below.
+ */
 export function profileLinks(profile: Profile | null) {
   if (!profile) return [];
-  const links: { label: string; href: string | null }[] = [
-    { label: "Google Scholar", href: profile.scholarUrl },
-    { label: "ORCID", href: profile.orcidUrl },
-    { label: "ResearchGate", href: profile.researchGateUrl },
-    { label: "GitHub", href: profile.githubUrl },
-    { label: "LinkedIn", href: profile.linkedinUrl },
-    { label: "X / Bluesky", href: profile.xUrl },
-  ];
-  return links.filter((l): l is { label: string; href: string } => !!l.href);
+  const links = [
+    {
+      id: "scholar",
+      label: "Google Scholar",
+      href: profile.scholarUrl,
+      order: profile.scholarOrder,
+    },
+    { id: "orcid", label: "ORCID", href: profile.orcidUrl, order: profile.orcidOrder },
+    {
+      id: "researchgate",
+      label: "ResearchGate",
+      href: profile.researchGateUrl,
+      order: profile.researchGateOrder,
+    },
+    { id: "github", label: "GitHub", href: profile.githubUrl, order: profile.githubOrder },
+    { id: "linkedin", label: "LinkedIn", href: profile.linkedinUrl, order: profile.linkedinOrder },
+    { id: "x", label: "X / Bluesky", href: profile.xUrl, order: profile.xOrder },
+  ] satisfies (Omit<ProfileLink, "href"> & { href: string | null; order: number | null })[];
+  return links
+    .filter((l) => !!l.href)
+    .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
+    .map(({ id, label, href }): ProfileLink => ({ id, label, href: href! }));
 }
+
+/** Skill names grouped by category (uncategorised ones under "Other"), in the order given. */
+export function groupSkills(skills: { name: string; category: string | null }[]) {
+  const groups = new Map<string, string[]>();
+  for (const s of skills) {
+    const key = s.category || "Other";
+    groups.set(key, [...(groups.get(key) ?? []), s.name]);
+  }
+  return [...groups];
+}
+
+export type ProfileLinkId = "scholar" | "orcid" | "researchgate" | "github" | "linkedin" | "x";
+export type ProfileLink = { id: ProfileLinkId; label: string; href: string };
 
 /** Unique values across publications, most frequent first. */
 export function tally(lists: string[][]) {

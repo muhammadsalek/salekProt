@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Fragment, useActionState } from "react";
 import { UploadField } from "@/components/admin/upload-field";
-import type { Field, FormState, FormValues } from "@/lib/admin/fields";
+import { UploadListField } from "@/components/admin/upload-list-field";
+import { MONTHS, type Field, type FormState, type FormValues } from "@/lib/admin/fields";
 
 type Props = {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
@@ -23,7 +24,11 @@ export function RecordForm({ action, fields, initialValues = {}, submitLabel, ca
   const values = state.values ?? initialValues;
 
   return (
-    <form action={formAction} className="space-y-5" noValidate>
+    <form
+      action={formAction}
+      className="grid grid-cols-[minmax(0,1fr)_7rem] gap-x-3 gap-y-5 *:col-span-2"
+      noValidate
+    >
       {state.error && (
         <p
           role="alert"
@@ -53,11 +58,14 @@ export function RecordForm({ action, fields, initialValues = {}, submitLabel, ca
               {field.section}
             </h2>
           )}
-          <FieldInput
-            field={field}
-            value={values[field.name]}
-            errors={state.fieldErrors?.[field.name]}
-          />
+          {/* A narrow field shares a row with the field before it. */}
+          <div className={field.narrow || fields[i + 1]?.narrow ? "col-span-1!" : undefined}>
+            <FieldInput
+              field={field}
+              value={values[field.name]}
+              errors={state.fieldErrors?.[field.name]}
+            />
+          </div>
         </Fragment>
       ))}
 
@@ -128,6 +136,15 @@ function FieldInput({
         describedBy={common["aria-describedby"]}
       />
     );
+  } else if (field.type === "uploads") {
+    control = (
+      <UploadListField
+        key={text}
+        field={field}
+        initialUrls={text ? text.split("\n") : []}
+        describedBy={common["aria-describedby"]}
+      />
+    );
   } else if (field.type === "textarea") {
     control = (
       <textarea
@@ -137,6 +154,17 @@ function FieldInput({
         placeholder={field.placeholder}
         className={inputClass}
       />
+    );
+  } else if (field.type === "month") {
+    control = (
+      <select {...common} defaultValue={text} className={inputClass}>
+        <option value="">—</option>
+        {MONTHS.map((m, i) => (
+          <option key={m} value={String(i + 1)}>
+            {m}
+          </option>
+        ))}
+      </select>
     );
   } else if (field.type === "select") {
     control = (

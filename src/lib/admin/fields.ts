@@ -10,7 +10,11 @@ export type FieldType =
   | "email"
   | "password"
   | "upload"
+  /** Several uploaded files, kept in order; stored as a string list. */
+  | "uploads"
   | "youtube"
+  /** Month of the year (1–12), shown as a dropdown; optional. */
+  | "month"
   | "checkbox"
   | "select"
   | "list";
@@ -23,10 +27,14 @@ export type Field = {
   help?: string;
   placeholder?: string;
   options?: readonly { value: string; label: string }[];
-  /** For type "upload": what kind of file goes to Cloudinary. */
+  /** For types "upload" and "uploads": what kind of file goes to Cloudinary. */
   upload?: "image" | "pdf";
+  /** For type "uploads": the most files allowed. */
+  maxFiles?: number;
   /** Starts a new titled group in the form before this field. */
   section?: string;
+  /** Shown in a narrow column beside the previous field (e.g. a position number). */
+  narrow?: boolean;
   rows?: number;
 };
 
@@ -47,7 +55,8 @@ const emptyToUndefined = (v: unknown) => (typeof v === "string" && v.trim() === 
 function fieldSchema(field: Field): z.ZodType {
   switch (field.type) {
     case "checkbox":
-      return z.preprocess((v) => v === "on" || v === "true", z.boolean());
+      // readForm already yields a boolean; raw "on"/"true" strings are accepted too.
+      return z.preprocess((v) => v === true || v === "on" || v === "true", z.boolean());
     case "number": {
       const n = z.coerce.number({ error: "Enter a number" }).int({ error: "Enter a whole number" });
       return field.required
@@ -76,6 +85,18 @@ function fieldSchema(field: Field): z.ZodType {
         ? z.preprocess(trimmed, url)
         : z.preprocess((v) => emptyToNull(trimmed(v)), url.nullable());
     }
+    // Form value is one URL per line (see readForm); stored as a list.
+    case "uploads": {
+      const file = z.union([z.string().regex(/^\/[\w\-./]+$/), z.url({ protocol: /^https?$/ })], {
+        error: "Please upload the files again.",
+      });
+      let list = z.array(file);
+      if (field.maxFiles) {
+        list = list.max(field.maxFiles, { error: `Add at most ${field.maxFiles} files.` });
+      }
+      if (field.required) list = list.min(1, { error: "Upload at least one file." });
+      return z.preprocess((v) => (typeof v === "string" ? uploadedUrls(v.split("\n")) : v), list);
+    }
     case "youtube": {
       const video = z.string().refine((v) => youtubeVideoId(v) !== null, {
         error: "Paste a YouTube video link, e.g. https://www.youtube.com/watch?v=…",
@@ -92,6 +113,11 @@ function fieldSchema(field: Field): z.ZodType {
         ? z.preprocess(trimmed, email)
         : z.preprocess(trimmed, z.union([z.literal(""), email]));
     }
+    case "month":
+      return z.preprocess(
+        emptyToNull,
+        z.coerce.number().int().min(1).max(12, { error: "Choose a month" }).nullable(),
+      );
     case "select": {
       const values = (field.options ?? []).map((o) => o.value) as [string, ...string[]];
       return z.enum(values, { error: `Choose a ${field.label.toLowerCase()}` });
@@ -121,6 +147,10 @@ export function schemaFor(fields: readonly Field[]) {
 export function readForm(fields: readonly Field[], formData: FormData): FormValues {
   return Object.fromEntries(
     fields.map((f) => {
+      if (f.type === "uploads") {
+        // One hidden input per file, in display order.
+        return [f.name, uploadedUrls(formData.getAll(f.name)).join("\n")];
+      }
       const v = formData.get(f.name);
       if (f.type === "checkbox") return [f.name, v === "on"];
       return [f.name, typeof v === "string" ? v : ""];
@@ -138,16 +168,28 @@ export function toFormValues(
     const v = record?.[f.name];
     if (f.type === "checkbox") values[f.name] = Boolean(v);
     else if (v instanceof Date) values[f.name] = v.toISOString().slice(0, 10);
-    else if (Array.isArray(v)) values[f.name] = v.join(", ");
+    else if (Array.isArray(v)) values[f.name] = v.join(f.type === "uploads" ? "\n" : ", ");
     else values[f.name] = v == null ? "" : String(v);
   }
   return values;
+}
+
+/** The non-empty file URLs in an "upload" or "uploads" value (a URL, a list, or nothing). */
+export function uploadedUrls(value: unknown): string[] {
+  const list = Array.isArray(value) ? value : [value];
+  return list
+    .filter((v): v is string => typeof v === "string" && v.trim() !== "")
+    .map((v) => v.trim());
 }
 
 /** Short human-readable text for list tables. */
 export function displayValue(field: Field, value: unknown): string {
   if (value == null || value === "") return "—";
   if (field.type === "checkbox") return value ? "Yes" : "No";
+  if (field.type === "month") return MONTHS[Number(value) - 1] ?? "—";
+  if (field.type === "uploads" && Array.isArray(value)) {
+    return value.length ? `${value.length} ${value.length === 1 ? "file" : "files"}` : "—";
+  }
   if (field.type === "select") {
     return field.options?.find((o) => o.value === value)?.label ?? String(value);
   }
@@ -157,3 +199,18 @@ export function displayValue(field: Field, value: unknown): string {
   if (Array.isArray(value)) return value.length ? value.join(", ") : "—";
   return String(value);
 }
+
+export const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
