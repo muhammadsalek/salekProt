@@ -1,8 +1,10 @@
+
 import Image from "next/image";
 import Link from "next/link";
 import { GalleryGrid } from "@/components/site/gallery-grid";
 import { ProfileLinkIcon } from "@/components/site/profile-link-icon";
 import { PublicationEntry } from "@/components/site/publication-entry";
+import ResearchWorldMap from "@/components/site/research-world-map";
 import { Section } from "@/components/site/section";
 import { TutorialGrid } from "@/components/site/tutorial-grid";
 import { groupSkills, profileLinks, tally } from "@/lib/format";
@@ -60,6 +62,7 @@ export default async function HomePage() {
       href: "/experience",
     },
   ].filter((f) => f.value > 0);
+
   const links = profileLinks(profile);
 
   return (
@@ -88,10 +91,17 @@ export default async function HomePage() {
             <h1 className="font-serif text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
               {profile.name}
             </h1>
+
             {profile.title && (
-              <p className="text-accent-strong mt-4 text-xl font-medium">{profile.title}</p>
+              <p className="text-accent-strong mt-4 text-xl font-medium">
+                {profile.title}
+              </p>
             )}
-            {affiliation && <p className="text-muted mt-1">{affiliation}</p>}
+
+            {affiliation && (
+              <p className="text-muted mt-1">{affiliation}</p>
+            )}
+
             {profile.focus && (
               <p className="mt-6 max-w-xl font-serif text-xl leading-relaxed text-pretty italic">
                 {profile.focus}
@@ -107,12 +117,14 @@ export default async function HomePage() {
                   Download CV
                 </a>
               )}
+
               <Link
                 href="/publications"
                 className="border-border bg-surface hover:border-accent rounded-md border px-5 py-2.5 font-medium transition-colors"
               >
                 Publications
               </Link>
+
               <Link
                 href="/contact"
                 className="border-border bg-surface hover:border-accent rounded-md border px-5 py-2.5 font-medium transition-colors"
@@ -163,21 +175,7 @@ export default async function HomePage() {
       </section>
 
       {countries.length > 0 && (
-        <section className="mt-12">
-          <p className="text-muted text-sm">Demographic and Health Survey data analysed so far</p>
-          <ul className="mt-2 flex flex-wrap gap-x-8 gap-y-1 font-serif text-lg">
-            {countries.map((c) => (
-              <li key={c}>
-                <Link
-                  href={`/publications?country=${encodeURIComponent(c)}`}
-                  className="hover:text-accent decoration-accent/40 underline decoration-1 underline-offset-4"
-                >
-                  {c}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <ResearchWorldMap countries={countries} />
       )}
 
       {profile.shortBio && (
@@ -190,12 +188,19 @@ export default async function HomePage() {
       )}
 
       {areas.length > 0 && (
-        <Section title="Research interests" more={{ href: "/research", label: "All research" }}>
+        <Section
+          title="Research interests"
+          more={{ href: "/research", label: "All research" }}
+        >
           <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {areas.map((a) => (
               <li key={a.id}>
-                <h3 className="font-serif text-lg font-semibold">{a.title}</h3>
-                <p className="text-muted mt-2 leading-relaxed">{a.summary}</p>
+                <h3 className="font-serif text-lg font-semibold">
+                  {a.title}
+                </h3>
+                <p className="text-muted mt-2 leading-relaxed">
+                  {a.summary}
+                </p>
               </li>
             ))}
           </ul>
@@ -203,11 +208,16 @@ export default async function HomePage() {
       )}
 
       {skills.length > 0 && (
-        <Section title="Skills" more={{ href: "/about", label: "More about me" }}>
+        <Section
+          title="Skills"
+          more={{ href: "/about", label: "More about me" }}
+        >
           <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {groupSkills(skills).map(([category, names]) => (
               <div key={category}>
-                <dt className="font-serif text-lg font-semibold">{category}</dt>
+                <dt className="font-serif text-lg font-semibold">
+                  {category}
+                </dt>
                 <dd className="mt-3">
                   <ul className="flex flex-wrap gap-1.5">
                     {names.map((n) => (
@@ -229,12 +239,22 @@ export default async function HomePage() {
       {featured.length > 0 && (
         <Section
           title="Selected publications"
-          more={{ href: "/publications", label: "All publications" }}
+          more={{
+            href: "/publications",
+            label: "All publications",
+          }}
         >
           <div className="max-w-3xl space-y-8">
             {featured.map((p) => (
-              <div key={p.id} className="border-accent/60 border-l-2 pl-5">
-                <PublicationEntry pub={p} author={profile.name} featured />
+              <div
+                key={p.id}
+                className="border-accent/60 border-l-2 pl-5"
+              >
+                <PublicationEntry
+                  pub={p}
+                  author={profile.name}
+                  featured
+                />
               </div>
             ))}
           </div>
@@ -242,13 +262,19 @@ export default async function HomePage() {
       )}
 
       {gallery.length > 0 && (
-        <Section title="Conferences & events" more={{ href: "/gallery", label: "Full gallery" }}>
+        <Section
+          title="Conferences & events"
+          more={{ href: "/gallery", label: "Full gallery" }}
+        >
           <GalleryGrid events={gallery} />
         </Section>
       )}
 
       {tutorials.length > 0 && (
-        <Section title="Latest tutorials" more={{ href: "/tutorials", label: "All tutorials" }}>
+        <Section
+          title="Latest tutorials"
+          more={{ href: "/tutorials", label: "All tutorials" }}
+        >
           <TutorialGrid tutorials={tutorials} />
         </Section>
       )}
