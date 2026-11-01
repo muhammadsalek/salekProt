@@ -1,21 +1,35 @@
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+
+  // Fix GitHub Codespaces Admin Login
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        "localhost:3000",
+        "nasty-mausoleum-v6qvjwwrwqv4fpgqj-3000.app.github.dev",
+      ],
+    },
+  },
+
   images: {
-    // Photos uploaded through the admin live on Cloudinary.
     remotePatterns: [
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
         pathname: `/${process.env.CLOUDINARY_CLOUD_NAME || "*"}/**`,
       },
-      // YouTube video thumbnails on the Tutorials page.
-      { protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
+        pathname: "/vi/**",
+      },
     ],
   },
+
   turbopack: {
     rules: {
       "*.css": {
