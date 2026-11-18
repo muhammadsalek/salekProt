@@ -6,7 +6,7 @@ import { ProfileLinkIcon } from "@/components/site/profile-link-icon";
 import { PublicationEntry } from "@/components/site/publication-entry";
 import { Section } from "@/components/site/section";
 import { TutorialGrid } from "@/components/site/tutorial-grid";
-import { groupSkills, profileLinks, tally } from "@/lib/format";
+import { groupSkills, profileLinks } from "@/lib/format";
 import {
   getExperience,
   getFeaturedPublications,
@@ -68,7 +68,6 @@ export default async function HomePage() {
     );
   }
 
-  const countries = tally(publications.map((p) => p.countries)).map(([country]) => country);
   const publishedCount = publications.filter(
     (p) => p.status === "PUBLISHED" || p.status === "ACCEPTED"
   ).length;
@@ -80,12 +79,12 @@ export default async function HomePage() {
   const statistics = [
     { value: publishedCount, label: "Published & accepted papers", href: "/publications" },
     { value: 3, label: "Completed funded projects", href: "/research" },
-    { value: countries.length, label: "Countries represented in research", href: "/research" },
+    { value: 5, label: "Countries studied", href: "/research" },
     { value: underReviewCount, label: "Manuscripts under review", href: "/publications?status=UNDER_REVIEW" },
   ].filter((item) => item.value > 0);
 
   return (
-    <main className="pb-16">
+    <main className="pb-0">
       {/* Hero: concise academic identity, not a full CV */}
       <section className="border-border border-b py-12 md:py-16">
         <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.75fr)] lg:gap-14">
@@ -134,8 +133,10 @@ export default async function HomePage() {
                   (BIIHR), teaching applied data analysis and biostatistics.
                 </li>
                 <li className="border-border border-l-2 pl-4 text-sm leading-6">
-                  <strong>Science communication</strong> — founder of Salek Data Lab
-                  (YouTube) and Research Diary (Facebook-based science education).
+                  <strong>Science communication</strong> — founder of{" "}
+                  <a href="https://www.youtube.com/@SalekResearch" target="_blank" rel="noopener noreferrer" className="text-accent-strong font-semibold underline underline-offset-4 hover:opacity-80">Salek Data Lab (YouTube)</a>
+                  {" "}and{" "}
+                  <a href="https://www.facebook.com/profile.php?id=61592785365591" target="_blank" rel="noopener noreferrer" className="text-accent-strong font-semibold underline underline-offset-4 hover:opacity-80">Research Diary (Facebook)</a>.
                 </li>
               </ul>
             </div>
@@ -204,21 +205,36 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Dynamic statistics; the funded count is taken from the three CV-confirmed projects. */}
+      {/* Evidence at a glance — responsive, soft-colored highlights. */}
       {statistics.length > 0 && (
-        <section className="border-border border-b py-9" aria-label="Research at a glance">
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            {statistics.map((item) => (
-              <Link key={item.label} href={item.href} className="group block">
-                <span className="block font-serif text-4xl font-semibold tabular-nums">
+        <section className="py-10" aria-label="Research at a glance">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {statistics.map((item, index) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`group rounded-xl border p-5 transition-transform hover:-translate-y-1 hover:shadow-sm ${
+                  index === 0
+                    ? "border-blue-200 bg-blue-50 text-blue-950"
+                    : index === 1
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+                      : index === 2
+                        ? "border-violet-200 bg-violet-50 text-violet-950"
+                        : "border-amber-200 bg-amber-50 text-amber-950"
+                }`}
+              >
+                <span className="block font-serif text-4xl font-semibold tabular-nums sm:text-5xl">
                   {item.value}
                 </span>
-                <span className="text-muted group-hover:text-accent mt-2 block text-sm leading-6 transition-colors">
+                <span className="mt-2 block text-sm font-semibold leading-6">
                   {item.label}
                 </span>
               </Link>
             ))}
           </div>
+          <p className="text-muted mt-3 text-xs">
+            Countries: Bangladesh, Nepal, Lesotho, Mozambique and Zambia.
+          </p>
         </section>
       )}
 
@@ -340,21 +356,108 @@ export default async function HomePage() {
         </Section>
       )}
 
-      <section className="border-border mt-14 border-t py-12">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+      {/* Selected recognition: concise highlights, full awards remain on About. */}
+      <Section title="Selected Awards & Achievements" more={{ href: "/about", label: "Academic profile & honours" }}>
+        <div className="grid gap-4 md:grid-cols-3">
+          {[
+            { year: "2026", title: "Best Promising Instructor", issuer: "SUST Data Science Club" },
+            { year: "2025", title: "Best Intern", issuer: "DataKothon Research Lab" },
+            { year: "2024", title: "Runner-Up — Research Poster", issuer: "Cardiovascular research · University of Dhaka" },
+          ].map((award) => (
+            <article key={award.title} className="border-border bg-surface rounded-lg border p-5">
+              <p className="text-accent-strong text-xs font-bold uppercase tracking-widest">{award.year} / Recognition</p>
+              <h3 className="mt-3 font-serif text-lg font-semibold">{award.title}</h3>
+              <p className="text-muted mt-2 text-sm leading-6">{award.issuer}</p>
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      {/* Full-width dark correspondence section */}
+      <section
+        id="contact"
+        className="mt-20 bg-[#142D36] py-16 text-white shadow-[0_0_0_100vmax_#142D36] [clip-path:inset(0_-100vmax)] md:py-24"
+      >
+        <div className="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:gap-20">
           <div>
-            <h2 className="font-serif text-2xl font-semibold">Research Collaboration</h2>
-            <p className="text-muted mt-3 max-w-2xl leading-7">
-              I welcome collaborations in epidemiology, biostatistics,
-              clinical outcomes and equitable population health research.
+            <p className="mb-5 text-xs font-bold uppercase tracking-[0.18em] text-[#A9D7CB]">
+              Correspondence
             </p>
+            <h2 className="font-serif text-5xl font-semibold tracking-tight text-white md:text-6xl">
+              Contact
+            </h2>
           </div>
-          <Link
-            href="/contact"
-            className="border-border hover:border-accent inline-flex shrink-0 justify-center rounded-md border px-6 py-3 text-sm font-semibold transition-colors"
-          >
-            Get in Touch
-          </Link>
+
+          <div>
+            <p className="max-w-2xl text-base leading-8 text-[#E3EAF0]">
+              I welcome inquiries regarding PhD supervision, academic
+              collaboration, and research opportunities in biostatistics,
+              epidemiology, health equity, and population health data science.
+            </p>
+
+            <dl className="mt-8 space-y-5 text-sm">
+              <div className="grid gap-1 sm:grid-cols-[110px_1fr]">
+                <dt className="font-semibold text-white">Email</dt>
+                <dd>
+                  <a
+                    href="mailto:saleksta@gmail.com"
+                    className="text-[#D5EEE7] underline underline-offset-4 hover:text-white"
+                  >
+                    saleksta@gmail.com
+                  </a>
+                </dd>
+              </div>
+
+              <div className="grid gap-1 sm:grid-cols-[110px_1fr]">
+                <dt className="font-semibold text-white">YouTube</dt>
+                <dd>
+                  <a
+                    href="https://www.youtube.com/@SalekResearch"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#D5EEE7] underline underline-offset-4 hover:text-white"
+                  >
+                    Salek Data Lab ↗
+                  </a>
+                </dd>
+              </div>
+
+              <div className="grid gap-1 sm:grid-cols-[110px_1fr]">
+                <dt className="font-semibold text-white">Facebook</dt>
+                <dd>
+                  <a
+                    href="https://www.facebook.com/profile.php?id=61592785365591"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#D5EEE7] underline underline-offset-4 hover:text-white"
+                  >
+                    Research Diary ↗
+                  </a>
+                </dd>
+              </div>
+
+              <div className="grid gap-1 sm:grid-cols-[110px_1fr]">
+                <dt className="font-semibold text-white">Website</dt>
+                <dd>
+                  <a
+                    href="https://salek-prot.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#D5EEE7] underline underline-offset-4 hover:text-white"
+                  >
+                    Academic Portfolio ↗
+                  </a>
+                </dd>
+              </div>
+            </dl>
+
+            <a
+              href="mailto:saleksta@gmail.com?subject=Academic%20Collaboration%20Inquiry"
+              className="mt-9 inline-flex items-center rounded-md bg-[#DDEDE6] px-6 py-3 font-semibold text-[#142D36] transition-colors hover:bg-white"
+            >
+              Email for Collaboration ↗
+            </a>
+          </div>
         </div>
       </section>
     </main>
