@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageTitle, Section } from "@/components/site/section";
 import { groupSkills } from "@/lib/format";
 import { getAboutData, getProfile } from "@/lib/queries";
+import { getAcademicActivities, ACTIVITY_CATEGORIES } from "@/lib/academic-activities";
 
 export const metadata: Metadata = {
   title: "About | Md Salek Miah",
@@ -49,9 +50,10 @@ const highlights = [
 ];
 
 export default async function AboutPage() {
-  const [profile, { education, skills, awards }] = await Promise.all([
+  const [profile, { education, skills, awards }, activities] = await Promise.all([
     getProfile(),
     getAboutData(),
+    getAcademicActivities(),
   ]);
 
   const skillGroups = groupSkills(skills);
@@ -230,6 +232,55 @@ export default async function AboutPage() {
         </Section>
       )}
 
+      {/* Admin-managed academic activities: additions appear without a code change. */}
+      <Section title="Training & Academic Activities">
+        <p className="text-muted mb-8 max-w-3xl leading-7">
+          Professional development, academic appointments, scientific meetings,
+          research-community involvement, and academic service.
+        </p>
+        {ACTIVITY_CATEGORIES.map((category, categoryIndex) => {
+          const entries = activities.filter((a) => a.category === category);
+          if (entries.length === 0) return null;
+          return (
+            <div key={category} className="border-border border-t py-7 first:border-t-0">
+              <div className="mb-5 flex items-baseline gap-4">
+                <span className="text-accent-strong text-xs font-semibold">
+                  {String(categoryIndex + 1).padStart(2, "0")}
+                </span>
+                <h3 className="font-serif text-xl font-semibold">{category}</h3>
+              </div>
+              <ul className="space-y-5">
+                {entries.map((entry) => (
+                  <li key={entry.id} className="grid gap-2 md:grid-cols-[11rem_1fr] md:gap-5">
+                    <p className="text-muted text-sm">{entry.dateLabel || ""}</p>
+                    <div>
+                      <h4 className="font-semibold">{entry.title}</h4>
+                      {entry.organization && <p className="text-muted mt-1 text-sm">{entry.organization}</p>}
+                      {entry.description && <p className="text-muted mt-2 whitespace-pre-line text-sm leading-7">{entry.description}</p>}
+                      {entry.link && (
+                        <a className="text-accent-strong mt-2 inline-block text-sm underline underline-offset-4"
+                          href={entry.link} target="_blank" rel="noopener noreferrer">
+                          View certificate or evidence
+                        </a>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+        {activities.length === 0 && <p className="text-muted text-sm">Professional activities will be listed here as they are added.</p>}
+      </Section>
+      {profile?.cvUrl && (
+        <Section title="Academic Curriculum Vitae">
+          <p className="text-muted max-w-3xl leading-7">A complete record of academic preparation, research appointments, publications, methodological expertise, teaching, and professional engagement.</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/cv" className="bg-accent text-accent-foreground rounded-md px-5 py-2.5 text-sm font-semibold">View Academic CV</Link>
+            <a href={profile.cvUrl} target="_blank" rel="noopener noreferrer" className="border-border rounded-md border px-5 py-2.5 text-sm font-semibold">Open CV PDF</a>
+          </div>
+        </Section>
+      )}
       <section className="border-border mt-14 border-t pt-10">
         <h2 className="font-serif text-2xl font-semibold">
           Research direction

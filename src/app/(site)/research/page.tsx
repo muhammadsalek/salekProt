@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPublications } from "@/lib/queries";
+import { getPublications, getResearchAreas } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Research & Scientific Contributions",
@@ -110,7 +110,7 @@ const standardCountries = [
 
 export default async function ResearchPage() {
   // Keep the existing query integration and preserve access to live publications.
-  const publications = await getPublications();
+  const [publications, researchAreas] = await Promise.all([getPublications(), getResearchAreas()]);
 
   const observedCountries = standardCountries.filter((country) =>
     publications.some((publication) =>
@@ -154,18 +154,36 @@ export default async function ResearchPage() {
 
       <section className="py-12" aria-labelledby="research-themes">
         <div className="mb-7 flex items-baseline justify-between gap-4">
-          <h2 id="research-themes" className="font-serif text-2xl font-semibold">Research Focus</h2>
-          <span className="text-muted text-xs">Four interconnected areas</span>
+          <h2 id="research-themes" className="font-serif text-2xl font-semibold">Research Areas</h2>
+          <span className="text-muted text-xs">Research interests & methodological expertise</span>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {researchThemes.map((theme) => (
-            <article key={theme.number} className="border-border rounded-lg border p-6">
-              <span className="text-accent-strong text-xs font-semibold">{theme.number}</span>
-              <h3 className="mt-3 font-serif text-xl font-semibold">{theme.title}</h3>
-              <p className="text-muted mt-3 text-sm leading-7">{theme.description}</p>
-            </article>
-          ))}
-        </div>
+        {researchAreas.length > 0 ? (
+          <div className="grid gap-5 sm:grid-cols-2">
+            {researchAreas.map((area, index) => (
+              <article key={area.id} className="border-border bg-surface overflow-hidden rounded-lg border">
+                {area.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={area.imageUrl} alt={area.title} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                )}
+                <div className="p-6">
+                  <span className="text-accent-strong text-xs font-semibold">{String(index + 1).padStart(2, "0")}</span>
+                  <h3 className="mt-3 font-serif text-xl font-semibold">{area.title}</h3>
+                  <p className="text-muted mt-3 text-sm leading-7">{area.summary}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {researchThemes.map((theme) => (
+              <article key={theme.number} className="border-border rounded-lg border p-6">
+                <span className="text-accent-strong text-xs font-semibold">{theme.number}</span>
+                <h3 className="mt-3 font-serif text-xl font-semibold">{theme.title}</h3>
+                <p className="text-muted mt-3 text-sm leading-7">{theme.description}</p>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="border-border border-t py-12" aria-labelledby="funded-projects">
