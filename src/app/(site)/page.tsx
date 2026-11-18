@@ -1,11 +1,15 @@
+
 import Image from "next/image";
 import Link from "next/link";
+
 import { GalleryGrid } from "@/components/site/gallery-grid";
 import { ProfileLinkIcon } from "@/components/site/profile-link-icon";
 import { PublicationEntry } from "@/components/site/publication-entry";
 import { Section } from "@/components/site/section";
 import { TutorialGrid } from "@/components/site/tutorial-grid";
+
 import { groupSkills, profileLinks, tally } from "@/lib/format";
+
 import {
   getExperience,
   getFeaturedPublications,
@@ -18,204 +22,436 @@ import {
 } from "@/lib/queries";
 
 export default async function HomePage() {
-  const [profile, featured, publications, areas, tutorials, experience, gallery, skills] =
-    await Promise.all([
-      getProfile(),
-      getFeaturedPublications(),
-      getPublications(),
-      getResearchAreas(),
-      getTutorials(3),
-      getExperience(),
-      getGalleryEvents(3),
-      getSkills(),
-    ]);
+  const [
+    profile,
+    featured,
+    publications,
+    areas,
+    tutorials,
+    experience,
+    gallery,
+    skills,
+  ] = await Promise.all([
+    getProfile(),
+    getFeaturedPublications(),
+    getPublications(),
+    getResearchAreas(),
+    getTutorials(3),
+    getExperience(),
+    getGalleryEvents(3),
+    getSkills(),
+  ]);
 
   if (!profile) {
     return (
-      <p className="text-muted py-24 text-center">
-        This site is being set up. Please check back soon.
-      </p>
+      <main className="py-24 text-center">
+        <h1 className="font-serif text-3xl font-semibold">
+          Academic Portfolio
+        </h1>
+        <p className="text-muted mt-4">
+          Profile information is temporarily unavailable.
+        </p>
+      </main>
     );
   }
 
-  const countries = tally(publications.map((p) => p.countries)).map(([c]) => c);
-  const affiliation = [profile.department, profile.institution].filter(Boolean).join(", ");
+  // Publication and research statistics
+  const countries = tally(
+    publications.map((publication) => publication.countries)
+  ).map(([country]) => country);
 
-  // Evidence at a glance, counted from the content so it stays current as he adds to it.
-  const facts = [
+  const publishedCount = publications.filter(
+    (publication) =>
+      publication.status === "PUBLISHED" ||
+      publication.status === "ACCEPTED"
+  ).length;
+
+  const underReviewCount = publications.filter(
+    (publication) => publication.status === "UNDER_REVIEW"
+  ).length;
+
+  const peerReviewCount = experience.filter(
+    (item) => item.category === "PEER_REVIEW"
+  ).length;
+
+  const affiliation = [
+    profile.department,
+    profile.institution,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const links = profileLinks(profile);
+
+  const statistics = [
     {
-      value: publications.filter((p) => p.status === "PUBLISHED" || p.status === "ACCEPTED").length,
-      label: "Peer-reviewed articles",
+      value: publishedCount,
+      label: "Published & Accepted Articles",
       href: "/publications",
     },
     {
-      value: publications.filter((p) => p.status === "UNDER_REVIEW").length,
-      label: "Manuscripts under review",
+      value: underReviewCount,
+      label: "Manuscripts Under Review",
       href: "/publications?status=UNDER_REVIEW",
     },
-    { value: countries.length, label: "Countries studied", href: "/research" },
     {
-      value: experience.filter((e) => e.category === "PEER_REVIEW").length,
-      label: "Publishers I review for",
+      value: countries.length,
+      label: "Countries Studied",
+      href: "/research",
+    },
+    {
+      value: peerReviewCount,
+      label: "Peer-Review Roles",
       href: "/experience",
     },
-  ].filter((f) => f.value > 0);
-  const links = profileLinks(profile);
+  ].filter((item) => item.value > 0);
 
   return (
-    <>
-      <section className="bg-accent-soft -mt-12 pt-12 pb-12 shadow-[0_0_0_100vmax_var(--accent-soft)] [clip-path:inset(0_-100vmax)] sm:-mt-16 sm:pt-16">
-        <div className="grid items-center gap-10 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-14">
-          {profile.photoUrl && (
-            <div className="relative mx-auto w-full max-w-sm md:mx-0">
-              <div
-                aria-hidden
-                className="border-accent/50 absolute inset-0 translate-x-3 translate-y-3 rounded-2xl border"
-              />
-              <Image
-                src={profile.photoUrl}
-                alt={`Portrait of ${profile.name}`}
-                width={571}
-                height={751}
-                priority
-                sizes="(min-width: 768px) 380px, 90vw"
-                className="relative aspect-[4/5] w-full rounded-2xl object-cover object-top shadow-lg shadow-black/10"
-              />
-            </div>
-          )}
+    <main className="pb-20">
+      {/* ============================== */}
+      {/* HERO SECTION                   */}
+      {/* ============================== */}
 
-          <div>
-            <h1 className="font-serif text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
+      <section className="border-border border-b py-14 md:py-20">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.4fr_0.8fr] lg:gap-20">
+
+          {/* LEFT: ACADEMIC INTRODUCTION */}
+          <div className="order-2 lg:order-1">
+            <p className="text-accent-strong mb-5 text-xs font-bold uppercase tracking-[0.2em]">
+              Academic Portfolio / Bangladesh
+            </p>
+
+            <h1 className="font-serif text-5xl font-semibold leading-tight tracking-tight sm:text-6xl lg:text-7xl">
               {profile.name}
             </h1>
-            {profile.title && (
-              <p className="text-accent-strong mt-4 text-xl font-medium">{profile.title}</p>
-            )}
-            {affiliation && <p className="text-muted mt-1">{affiliation}</p>}
-            {profile.focus && (
-              <p className="mt-6 max-w-xl font-serif text-xl leading-relaxed text-pretty italic">
-                {profile.focus}
+
+            <p className="text-accent-strong mt-6 text-lg font-semibold leading-relaxed">
+              Applied Statistics | Epidemiology |
+              Biostatistics | Health Data Science
+            </p>
+
+            {affiliation && (
+              <p className="text-muted mt-3 leading-relaxed">
+                {affiliation}
               </p>
             )}
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              {profile.cvUrl && (
-                <a
-                  href="/cv"
-                  className="bg-accent text-accent-foreground hover:bg-accent-strong rounded-md px-5 py-2.5 font-medium shadow-sm transition-colors"
+            {/* PROFESSIONAL BIOGRAPHY */}
+            <div className="mt-9 max-w-2xl">
+              <h2 className="font-serif text-2xl font-semibold">
+                Bio
+              </h2>
+
+              <p className="text-muted mt-5 text-base leading-8">
+                I am an early-career researcher specializing in
+                applied statistics, epidemiology, biostatistics,
+                and explainable machine learning, with several
+                peer-reviewed publications in international
+                journals, including Q1-ranked journals. My
+                research integrates statistical modelling,
+                nationally representative survey data, and
+                interpretable machine learning to investigate
+                population health challenges, healthcare
+                inequalities, and evidence-based public health
+                interventions. I have completed contributions
+                to three university-funded research projects
+                supported by the SUST Research Centre.
+              </p>
+
+              <p className="text-muted mt-4 text-base leading-8">
+                My current research activities include serving
+                as the appointed Lead Research Assistant for a
+                prospective post-stroke disability and
+                quality-of-life cohort study, currently in the
+                planning stage, in collaboration with clinical
+                researchers. My contributions include protocol
+                development, questionnaire design, recruitment
+                planning, and longitudinal analysis planning.
+                I have also contributed to the PROSPERO-registered
+                methodological review,{" "}
+                <span className="font-medium">
+                  Best Practices for Machine Learning with
+                  Complex Survey Data
+                </span>{" "}
+                (CRD420261399081), examining complex survey
+                design, sampling weights, missing data,
+                predictive validation, and methodological bias.
+              </p>
+            </div>
+
+            {/* EXPLORE MY WORK */}
+            <div className="mt-9">
+              <h3 className="font-serif text-xl font-semibold">
+                Explore My Work
+              </h3>
+
+              <p className="text-muted mt-3 max-w-2xl leading-8">
+                Explore my{" "}
+                <Link
+                  href="/research"
+                  className="text-accent-strong font-medium underline underline-offset-4"
                 >
-                  Download CV
-                </a>
+                  research
+                </Link>
+                ,{" "}
+                <Link
+                  href="/publications"
+                  className="text-accent-strong font-medium underline underline-offset-4"
+                >
+                  peer-reviewed publications
+                </Link>
+                ,{" "}
+                <Link
+                  href="/experience"
+                  className="text-accent-strong font-medium underline underline-offset-4"
+                >
+                  academic experience
+                </Link>
+                , and{" "}
+                <Link
+                  href="/projects"
+                  className="text-accent-strong font-medium underline underline-offset-4"
+                >
+                  research projects
+                </Link>
+                .
+              </p>
+            </div>
+
+            {/* PRIMARY ACTION BUTTONS */}
+            <div className="mt-9 flex flex-wrap gap-3">
+              {profile.cvUrl && (
+                <Link
+                  href="/cv"
+                  className="bg-accent text-accent-foreground hover:bg-accent-strong inline-flex items-center justify-center rounded-md px-5 py-3 text-sm font-semibold transition-colors"
+                >
+                  Academic CV
+                </Link>
               )}
+
+              <Link
+                href="/research"
+                className="border-border bg-surface hover:border-accent inline-flex items-center justify-center rounded-md border px-5 py-3 text-sm font-semibold transition-colors"
+              >
+                Explore Research
+              </Link>
+
               <Link
                 href="/publications"
-                className="border-border bg-surface hover:border-accent rounded-md border px-5 py-2.5 font-medium transition-colors"
+                className="border-border bg-surface hover:border-accent inline-flex items-center justify-center rounded-md border px-5 py-3 text-sm font-semibold transition-colors"
               >
                 Publications
               </Link>
-              <Link
-                href="/contact"
-                className="border-border bg-surface hover:border-accent rounded-md border px-5 py-2.5 font-medium transition-colors"
-              >
-                Get in touch
-              </Link>
             </div>
 
+            {/* ACADEMIC PROFILE LINKS */}
             {links.length > 0 && (
-              <ul aria-label="Profiles" className="mt-4 flex flex-wrap gap-2">
-                {links.map((l) => (
-                  <li key={l.id}>
+              <ul
+                aria-label="Academic profiles"
+                className="mt-7 flex flex-wrap gap-x-5 gap-y-3"
+              >
+                {links.map((link) => (
+                  <li key={link.id}>
                     <a
-                      href={l.href}
+                      href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="border-border bg-surface hover:border-accent hover:text-accent inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
+                      className="text-muted hover:text-accent inline-flex items-center gap-2 text-sm font-medium transition-colors"
                     >
-                      <ProfileLinkIcon id={l.id} className="size-4 shrink-0" />
-                      {l.label}
+                      <ProfileLinkIcon
+                        id={link.id}
+                        className="size-4 shrink-0"
+                      />
+                      {link.label}
                     </a>
                   </li>
                 ))}
               </ul>
             )}
           </div>
-        </div>
 
-        {facts.length > 0 && (
-          <ul
-            aria-label="At a glance"
-            className="border-accent/20 mt-12 grid grid-cols-2 gap-x-6 gap-y-8 border-t pt-8 sm:grid-cols-4"
-          >
-            {facts.map((f) => (
-              <li key={f.label}>
-                <Link href={f.href} className="group block">
-                  <span className="text-foreground block font-serif text-4xl font-semibold tabular-nums">
-                    {f.value}
+          {/* RIGHT: PROFILE PHOTO */}
+          {profile.photoUrl && (
+            <div className="order-1 mx-auto w-full max-w-sm lg:order-2 lg:ml-auto">
+              <div className="border-border bg-surface overflow-hidden rounded-lg border p-2 shadow-sm">
+                <Image
+                  src={profile.photoUrl}
+                  alt={`Portrait of ${profile.name}`}
+                  width={571}
+                  height={751}
+                  priority
+                  sizes="(min-width: 1024px) 360px, 90vw"
+                  className="aspect-[4/5] w-full rounded-sm object-cover object-top"
+                />
+
+                <div className="flex flex-wrap items-center justify-between gap-2 px-2 pt-3">
+                  <span className="text-sm font-semibold">
+                    {profile.name}
                   </span>
-                  <span className="text-muted group-hover:text-accent mt-1 block text-sm transition-colors">
-                    {f.label}
+
+                  <span className="text-muted text-xs">
+                    Early-Career Researcher
                   </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </section>
 
-      {countries.length > 0 && (
-        <section className="mt-12">
-          <p className="text-muted text-sm">Demographic and Health Survey data analysed so far</p>
-          <ul className="mt-2 flex flex-wrap gap-x-8 gap-y-1 font-serif text-lg">
-            {countries.map((c) => (
-              <li key={c}>
-                <Link
-                  href={`/publications?country=${encodeURIComponent(c)}`}
-                  className="hover:text-accent decoration-accent/40 underline decoration-1 underline-offset-4"
-                >
-                  {c}
-                </Link>
-              </li>
+      {/* ============================== */}
+      {/* RESEARCH ACHIEVEMENTS          */}
+      {/* ============================== */}
+
+      {statistics.length > 0 && (
+        <section className="border-border border-b py-12">
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+            {statistics.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="group block"
+              >
+                <span className="block font-serif text-4xl font-semibold tabular-nums md:text-5xl">
+                  {item.value}
+                </span>
+
+                <span className="text-muted group-hover:text-accent mt-2 block text-sm leading-relaxed transition-colors">
+                  {item.label}
+                </span>
+              </Link>
             ))}
-          </ul>
+          </div>
         </section>
       )}
 
-      {profile.shortBio && (
-        <p className="mt-16 max-w-2xl text-lg leading-relaxed">
-          {profile.shortBio}{" "}
-          <Link href="/about" className="text-accent hover:underline">
-            More about me
-          </Link>
-        </p>
-      )}
+      {/* ============================== */}
+      {/* RESEARCH INTERESTS             */}
+      {/* ============================== */}
 
       {areas.length > 0 && (
-        <Section title="Research interests" more={{ href: "/research", label: "All research" }}>
-          <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {areas.map((a) => (
-              <li key={a.id}>
-                <h3 className="font-serif text-lg font-semibold">{a.title}</h3>
-                <p className="text-muted mt-2 leading-relaxed">{a.summary}</p>
+        <Section
+          title="Research Interests"
+          more={{
+            href: "/research",
+            label: "Explore All Research",
+          }}
+        >
+          <div className="grid gap-5 md:grid-cols-2">
+            {areas.map((area, index) => (
+              <article
+                key={area.id}
+                className="border-border hover:border-accent/50 rounded-lg border p-6 transition-colors"
+              >
+                <p className="text-accent-strong mb-4 text-xs font-semibold uppercase tracking-widest">
+                  Research Area{" "}
+                  {String(index + 1).padStart(2, "0")}
+                </p>
+
+                <h3 className="font-serif text-xl font-semibold">
+                  {area.title}
+                </h3>
+
+                <p className="text-muted mt-3 text-sm leading-7">
+                  {area.summary}
+                </p>
+              </article>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ============================== */}
+      {/* SELECTED PUBLICATIONS          */}
+      {/* ============================== */}
+
+      {featured.length > 0 && (
+        <Section
+          title="Selected Peer-Reviewed Publications"
+          more={{
+            href: "/publications",
+            label: "View All Publications",
+          }}
+        >
+          <div className="max-w-4xl space-y-7">
+            {featured.map((publication) => (
+              <article
+                key={publication.id}
+                className="border-border border-b pb-7 last:border-b-0"
+              >
+                <PublicationEntry
+                  pub={publication}
+                  author={profile.name}
+                  featured
+                />
+              </article>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ============================== */}
+      {/* RESEARCH GEOGRAPHY             */}
+      {/* ============================== */}
+
+      {countries.length > 0 && (
+        <Section
+          title="Research Geography & Study Populations"
+          more={{
+            href: "/research",
+            label: "Research Overview",
+          }}
+        >
+          <p className="text-muted mb-6 max-w-3xl leading-8">
+            My research includes population-based
+            investigations using nationally
+            representative survey datasets.
+            Explore publications associated with
+            different countries and study populations.
+          </p>
+
+          <ul className="flex flex-wrap gap-3">
+            {countries.map((country) => (
+              <li key={country}>
+                <Link
+                  href={`/publications?country=${encodeURIComponent(country)}`}
+                  className="border-border bg-surface hover:border-accent inline-flex rounded-md border px-4 py-2 text-sm transition-colors"
+                >
+                  {country}
+                </Link>
               </li>
             ))}
           </ul>
         </Section>
       )}
 
+      {/* ============================== */}
+      {/* STATISTICAL EXPERTISE          */}
+      {/* ============================== */}
+
       {skills.length > 0 && (
-        <Section title="Skills" more={{ href: "/about", label: "More about me" }}>
-          <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Section
+          title="Statistical & Computational Expertise"
+          more={{
+            href: "/about",
+            label: "More About My Background",
+          }}
+        >
+          <dl className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {groupSkills(skills).map(([category, names]) => (
               <div key={category}>
-                <dt className="font-serif text-lg font-semibold">{category}</dt>
-                <dd className="mt-3">
-                  <ul className="flex flex-wrap gap-1.5">
-                    {names.map((n) => (
+                <dt className="font-serif text-lg font-semibold">
+                  {category}
+                </dt>
+
+                <dd className="mt-4">
+                  <ul className="flex flex-wrap gap-2">
+                    {names.map((name) => (
                       <li
-                        key={n}
-                        className="border-border bg-surface rounded-md border px-2.5 py-1 text-sm"
+                        key={name}
+                        className="border-border rounded-md border px-3 py-1.5 text-xs"
                       >
-                        {n}
+                        {name}
                       </li>
                     ))}
                   </ul>
@@ -226,32 +462,66 @@ export default async function HomePage() {
         </Section>
       )}
 
-      {featured.length > 0 && (
-        <Section
-          title="Selected publications"
-          more={{ href: "/publications", label: "All publications" }}
-        >
-          <div className="max-w-3xl space-y-8">
-            {featured.map((p) => (
-              <div key={p.id} className="border-accent/60 border-l-2 pl-5">
-                <PublicationEntry pub={p} author={profile.name} featured />
-              </div>
-            ))}
-          </div>
-        </Section>
-      )}
+      {/* ============================== */}
+      {/* ACADEMIC EVENTS                */}
+      {/* ============================== */}
 
       {gallery.length > 0 && (
-        <Section title="Conferences & events" more={{ href: "/gallery", label: "Full gallery" }}>
+        <Section
+          title="Conferences & Academic Activities"
+          more={{
+            href: "/gallery",
+            label: "View Full Gallery",
+          }}
+        >
           <GalleryGrid events={gallery} />
         </Section>
       )}
 
+      {/* ============================== */}
+      {/* RESEARCH TUTORIALS             */}
+      {/* ============================== */}
+
       {tutorials.length > 0 && (
-        <Section title="Latest tutorials" more={{ href: "/tutorials", label: "All tutorials" }}>
+        <Section
+          title="Teaching & Research Tutorials"
+          more={{
+            href: "/tutorials",
+            label: "Explore All Tutorials",
+          }}
+        >
           <TutorialGrid tutorials={tutorials} />
         </Section>
       )}
-    </>
+
+      {/* ============================== */}
+      {/* CONTACT SECTION                */}
+      {/* ============================== */}
+
+      <section className="border-border mt-16 border-t py-14">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-serif text-2xl font-semibold">
+              Research & Academic Collaboration
+            </h2>
+
+            <p className="text-muted mt-4 max-w-2xl leading-8">
+              I welcome opportunities for academic
+              collaboration, interdisciplinary
+              research, and scholarly exchange in
+              biostatistics, epidemiology,
+              public health, and data science.
+            </p>
+          </div>
+
+          <Link
+            href="/contact"
+            className="border-border hover:border-accent inline-flex shrink-0 justify-center rounded-md border px-6 py-3 text-sm font-semibold transition-colors"
+          >
+            Get in Touch
+          </Link>
+        </div>
+      </section>
+    </main>
   );
 }
