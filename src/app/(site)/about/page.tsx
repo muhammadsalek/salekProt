@@ -373,44 +373,87 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      {/* Full-width dark correspondence band, independent of the light theme. */}
-      <section className="mt-16 bg-[#142D36] py-16 text-white shadow-[0_0_0_100vmax_#142D36] [clip-path:inset(0_-100vmax)] md:py-20">
-        <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr] md:gap-16">
+      {/* Full-width dark correspondence section */}
+      <section
+        id="contact"
+        className="mt-20 bg-[#142D36] py-16 text-white shadow-[0_0_0_100vmax_#142D36] [clip-path:inset(0_-100vmax)] md:py-24"
+      >
+        <div className="grid gap-10 md:grid-cols-[0.8fr_1.2fr] md:gap-20">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#A9D7CB]">
+            <p className="mb-5 text-xs font-bold uppercase tracking-[0.18em] text-[#A9D7CB]">
               Correspondence
             </p>
-            <h2 className="mt-4 font-serif text-5xl font-semibold text-white md:text-6xl">
+            <h2 className="font-serif text-5xl font-semibold tracking-tight text-white md:text-6xl">
               Contact
             </h2>
           </div>
+
           <div>
             <p className="max-w-2xl text-base leading-8 text-[#E3EAF0]">
-              I welcome inquiries about PhD supervision, research collaboration,
-              and academic opportunities in biostatistics, epidemiology,
-              and population health data science.
+              I welcome inquiries regarding PhD supervision, academic
+              collaboration, and research opportunities in biostatistics,
+              epidemiology, health equity, and population health data science.
             </p>
-            <dl className="mt-7 space-y-4 text-sm">
-              <div className="grid gap-1 sm:grid-cols-[90px_1fr]">
+
+            <dl className="mt-8 space-y-5 text-sm">
+              <div className="grid gap-1 sm:grid-cols-[110px_1fr]">
                 <dt className="font-semibold text-white">Email</dt>
                 <dd>
-                  <a href="mailto:saleksta@gmail.com" className="text-[#D5EEE7] underline underline-offset-4 hover:text-white">
+                  <a
+                    href="mailto:saleksta@gmail.com"
+                    className="text-[#D5EEE7] underline underline-offset-4 hover:text-white"
+                  >
                     saleksta@gmail.com
                   </a>
                 </dd>
               </div>
-              <div className="grid gap-1 sm:grid-cols-[90px_1fr]">
+
+              <div className="grid gap-1 sm:grid-cols-[110px_1fr]">
+                <dt className="font-semibold text-white">YouTube</dt>
+                <dd>
+                  <a
+                    href="https://www.youtube.com/@SalekResearch"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#D5EEE7] underline underline-offset-4 hover:text-white"
+                  >
+                    Salek Data Lab ↗
+                  </a>
+                </dd>
+              </div>
+
+              <div className="grid gap-1 sm:grid-cols-[110px_1fr]">
+                <dt className="font-semibold text-white">Facebook</dt>
+                <dd>
+                  <a
+                    href="https://www.facebook.com/profile.php?id=61592785365591"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#D5EEE7] underline underline-offset-4 hover:text-white"
+                  >
+                    Research Diary ↗
+                  </a>
+                </dd>
+              </div>
+
+              <div className="grid gap-1 sm:grid-cols-[110px_1fr]">
                 <dt className="font-semibold text-white">Website</dt>
                 <dd>
-                  <a href="https://salek-prot.vercel.app" target="_blank" rel="noopener noreferrer" className="text-[#D5EEE7] underline underline-offset-4 hover:text-white">
+                  <a
+                    href="https://salek-prot.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#D5EEE7] underline underline-offset-4 hover:text-white"
+                  >
                     Academic Portfolio ↗
                   </a>
                 </dd>
               </div>
             </dl>
+
             <a
               href="mailto:saleksta@gmail.com?subject=Academic%20Collaboration%20Inquiry"
-              className="mt-8 inline-flex items-center rounded-md bg-[#DDEDE6] px-6 py-3 text-sm font-semibold text-[#142D36] transition-colors hover:bg-white"
+              className="mt-9 inline-flex items-center rounded-md bg-[#DDEDE6] px-6 py-3 font-semibold text-[#142D36] transition-colors hover:bg-white"
             >
               Email for Collaboration ↗
             </a>
